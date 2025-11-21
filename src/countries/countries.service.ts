@@ -13,12 +13,15 @@ export class CountriesService {
 
   async findByCode(code: string): Promise<Country> {
     let country = await this.countryModel.findOne({ cca3: code }).exec();
+    let source = 'cache';
     if (!country) {
       const countryData =
         await this.restCountriesProvider.getCountryByCode(code);
       const created = await this.countryModel.create(countryData);
       country = created;
+      source = 'api';
     }
+    country.source = source;
     return country;
   }
 

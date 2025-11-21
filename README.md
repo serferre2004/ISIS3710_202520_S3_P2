@@ -1,98 +1,126 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
+# Parcial 2 - Programación con tecnologías web
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
+Este repositorio contiene el código fuente de la solución al parcial 2 de la materia con todos los requisitos propuestos en la guía.
+## Configuración del proyecto
+Para instalar dependencias y preparar el entorno de NestJS se debe ejecutar el siguiente comando en una terminal desde la raíz del proyecto
 ```bash
 $ npm install
 ```
-
-## Compile and run the project
-
+Este proyecto utiliza como tecnología de base de datos **MongoDB** con alojamiento local, por lo que para la ejecución correcta del proyecto se debe tener una conexión local abierta de **MongoDB** con una base de datos llamada **P2** donde se almacenarán las colecciones `countries` y `travel-plans`. Esta conexión local debe correr en:
+```
+http://localhost:27017/P2/
+```
+## Compilar y correr
+Una vez que esté corriendo adecuadamente la base de datos se puede ejecutar el proyecto con el comando
 ```bash
 # development
 $ npm run start
+```
+Una vez ejecutado se pueden realizar las peticiones usando Postman o cualquier manejador de peticiones HTTP a:
+```
+http://localhost:3000
+```
+## Estructura del proyecto
+Este proyecto de NestJS tiene dos módulos organizados de la siguiente manera:
 
-# watch mode
-$ npm run start:dev
+    src/
+    ├── app.controller.ts
+    ├── app.module.ts
+    ├── app.service.ts
+    ├── main.ts
+    ├── countries/
+    │   ├── countries.controller.ts
+    |   ├── countries.module.ts
+    |   ├── countries.service.ts
+    |   ├── providers/
+    |   |   ├── country.interface.ts
+    |   |   └── rest-countries.provider.ts
+    |   └── schemas/
+    |       └── country.schema.ts
+    └── travel-plans/
+        ├── travel-plans.controller.ts
+        ├── travel-plans.module.ts
+        ├── travel-plans.service.ts
+        ├── dto/
+        |   └── travel-plans.dto.ts
+        └── schemas/
+            └── travel-plan.schema.ts
 
-# production mode
-$ npm run start:prod
+Acá podemos observar los dos módulos que componen al proyecto, en cada uno de ellos tenemos el archivo `.module` que se encarga de manejar las inyecciones de dependencias del módulo, el archivo `.controller` que se encarga de exponer los endpoints y el archivo `.server` que contiene la lógica de cada módulo. Adicionalmente tenemos el archivo `.schema` que define la estructura de los documentos que se guardan en la base de datos.
+
+En el módulo `countries` tenemos una carpeta `providers` en donde se define la interfaz de los países, la estructura de los datos que tiene cada país y un provider que se encarga únicamente de realizar peticiones a la API de https://restcountries.com/v3.1/alpha solicitando la información de un país en específico.
+
+En el módulo `travel-plans` tenemos un archivo `.dto` que utiliza el controlador para que cada vez que recibe una petición de tipo POST validar los datos usando el DTO antes de que pase por el servicio del módulo.
+
+## Endpoints
+
+El módulo `countries` expone los endpoints:
+
+* `/all`: que muestra la información de todos los países que están guardados en la base de datos de caché
+* `/code/<CODE>`: que muestra la información del país cuyo código alpha-3 corresponde a `<CODE>`.
+
+El módulo `travel-plans` expone los endpoints:
+
+* `/all`: que muestra todos los planes de viaje registrados
+* `/id/<ID>`: que muestra la información del plan de viaje con el id correspondiente a `<ID>`
+* `/create`: que acepta peticiones de tipo POST en dónde en el body se encuentra la información del plan de viaje a crear. Un ejemplo sería
+``` json
+// Request Body
+{
+  "countryCode": "COL",
+  "title": "Example travel plan",
+  "startDate": "2025-11-20",
+  "endDate": "2026-01-01"
+}
 ```
 
-## Run tests
+## Provider Externo
 
-```bash
-# unit tests
-$ npm run test
+El provider externo que se encuentra en el módulo `countries` utiliza axios para manejar las peticiones, en el método `getCountryByCode()` define la url a la que le hará la petición y ejecuta el método get, a partir de esto revisa que haya obtenido una respuesta y la transforma al formato de campos definido para los países. Si hubo un error se arroja la excepción.
 
-# e2e tests
-$ npm run test:e2e
+## Modelo de datos
 
-# test coverage
-$ npm run test:cov
-```
+Los documentos que se guardan en la base de datos son de colección `countries` o de colección `travel-plans`, estos primeros tienen los campos:
 
-## Deployment
+* `cca3`: string
+* ``name``: string
+* ``region``: string
+* ``subregion``: string
+* ``capital``: string
+* ``population``: number
+* ``flag``: string
+* ``source``: string (Opcional, este campo se llena cuando el controlador sabe si la información fue obtenida de caché o de API)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+La colección `travel-plans` tiene los siguientes campos:
+* ``countryCode``: string
+* ``title``: string
+* ``startDate``: string
+* ``endDate``: string
+* ``notes``: string (Opcional)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Pruebas de ejecución
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### Consultar país no cacheado
+![alt text](image.png)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Consultar país cacheado
+![alt text](image-1.png)
 
-## Resources
+### Consultar país no válido
+![alt text](image-2.png)
 
-Check out a few resources that may come in handy when working with NestJS:
+### Consultar todos los paises cacheados
+![alt text](image-3.png)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Crear nuevo plan de viaje
+![alt text](image-4.png)
 
-## Support
+### Plan de viaje con campos inválidos
+![alt text](image-5.png)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Listar planes de viaje
+![alt text](image-6.png)
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Obtener un plan de viaje
+![alt text](image-7.png)

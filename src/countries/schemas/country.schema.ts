@@ -23,6 +23,9 @@ export class Country extends Document {
 
   @Prop()
   flag: string;
+
+  @Prop({ required: false })
+  source?: string;
 }
 
 export const CountrySchema = SchemaFactory.createForClass(Country);
