@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TravelPlan } from './schemas/travel-plan.schema';
@@ -9,6 +9,7 @@ import { CountriesService } from '../countries/countries.service';
 export class TravelPlansService {
   constructor(
     @InjectModel(TravelPlan.name) private travelPlanModel: Model<TravelPlan>,
+    @Inject(forwardRef(() => CountriesService))
     private countriesService: CountriesService,
   ) {}
 
@@ -31,5 +32,12 @@ export class TravelPlansService {
       throw new Error('Travel plan not found');
     }
     return travelPlan;
+  }
+
+  async countryInUse(code: string): Promise<boolean> {
+    const count = await this.travelPlanModel
+      .countDocuments({ countryCode: code })
+      .exec();
+    return count > 0;
   }
 }

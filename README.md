@@ -124,3 +124,13 @@ La colección `travel-plans` tiene los siguientes campos:
 
 ### Obtener un plan de viaje
 ![alt text](image-7.png)
+
+## Ampliación requerimientos parcial
+
+Para ampliar los requerimientos inicialmente se añadió un endpoint DELETE al controlador del módulo `countries` en el que se realiza un llamado al método `deleteFromCache()` implementado en el servicio de dicho módulo. En este método se verifica que el país no se encuentre en ningún plan de viaje, para esto se llama al método `countryInUse()` implementado en el servicio del módulo `travel-plans`. De esta manera se lanza una excepción si se encuentra en algún plan de viaje, de lo contrario se procede a tratar de eliminar el país.
+
+Para la implementación del guard de este método se implemento en `src/common/guards/api-key.guard.ts`, el cual verifica que el campo `x-api-key` del header corresponda al string `'valid-api-key'`. De esta manera se permite la petición, si no se lanza un `UnauthorizedException`, este guard solo se incluye en el método delete implementado.
+
+Para el logging usando un middleware se implementó en `src/common/middleware/logging.middleware.ts` En donde se registra las peticiones de entrada y respuestas de salida, y datos como la duración, el tipo de petición o el header de la petición, esto se incluye en el AppModule para todos los endpoints de la aplicación.
+
+Para probar esta ampliación de requerimientos se puede ejecutar desde Postman o cualquier manejador de peticiones HTTP al servidor un método DELETE a la ruta `http://localhost:3000/countries/<CODE>` donde `<CODE>` corresponde al código alpha-3 del país a eliminar, dentro de el manejador usado se puede validar el guard incluyendo en el header para la clave `x-api-key` el valor `valid-api-key`. Finalmente, en consola se pueden ver los registros hechos por el middleware de todas las peticiones recibidas.
